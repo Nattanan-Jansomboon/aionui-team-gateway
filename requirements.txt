@@ -1,0 +1,12 @@
+# แพ็กเกจที่โค้ดใน src/ และ scripts/ import ตรง ๆ (โมดูลอื่นเป็นของ Python มาตรฐาน)
+# ติดตั้ง: pip install -r requirements.txt
+
+fastapi            # gateway: เว็บเฟรมเวิร์ก (src/gateway.py)
+pydantic           # gateway: ตรวจรูปแบบข้อมูลของ /ask (มากับ fastapi แต่ import ตรง จึงประกาศไว้)
+uvicorn            # รัน gateway และโหมด HTTP ของ MCP server
+httpx              # เรียก REST API ของ AionUi
+websockets         # รอ event ของ Team ทาง WebSocket (src/gateway.py, scripts/ws_probe.py)
+mcp[cli]>=1.9      # MCP server (src/mcp_server.py) รองรับทั้ง mcp 1.x และ 2.x
+
+# เวอร์ชันที่ทดสอบแล้ว (2026-11): fastapi 0.143, pydantic 2.14, uvicorn 0.54,
+# httpx 0.28, websockets 17.2, mcp 2.3

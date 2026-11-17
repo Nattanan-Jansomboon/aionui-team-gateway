@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ถามทีม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef2f1;
+    --surface: #ffffff;
+    --ink: #17302c;
+    --muted: #5b7370;
+    --line: #cfdad8;
+    --accent: #0f6b5c;
+    --accent-ink: #ffffff;
+    --error: #a1362b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1a18;
+      --surface: #16241f;
+      --ink: #e3efec;
+      --muted: #8fa9a4;
+      --line: #28403a;
+      --accent: #3fb59f;
+      --accent-ink: #082019;
+      --error: #f08a7e;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans Thai", system-ui, sans-serif;
+    line-height: 1.7;
+    padding: 24px 16px 64px;
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; font-weight: 600; margin: 24px 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    padding: 14px;
+    font: inherit;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  textarea:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .row { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  button {
+    font: inherit;
+    font-weight: 500;
+    padding: 10px 22px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+  }
+  button:disabled { opacity: .55; cursor: wait; }
+  .status { color: var(--muted); font-size: .95rem; }
+  #answer {
+    margin-top: 28px;
+    padding: 18px;
+    background: var(--surface);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  #answer[hidden] { display: none; }
+  #answer.error { border-left-color: var(--error); color: var(--error); }
+</style>
+</head>
+<body>
+<main>
+  <h1>ถามทีม</h1>
+  <p class="sub">พิมพ์คำถาม แล้วรอทีมตอบ อาจใช้เวลาครู่หนึ่ง</p>
+
+  <textarea id="q" placeholder="พิมพ์คำถามที่นี่" maxlength="2000"></textarea>
+  <div class="row">
+    <button id="send">ส่งคำถาม</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div id="answer" hidden></div>
+</main>
+
+<script>
+  // แก้ให้ตรงกับที่อยู่ gateway ของคุณ (เวอร์ชัน DEMO ไม่มี API key)
+  const GATEWAY_URL = "http://127.0.0.1:8000/ask";
+
+  const q = document.getElementById("q");
+  const send = document.getElementById("send");
+  const statusEl = document.getElementById("status");
+  const answer = document.getElementById("answer");
+
+  function show(text, isError) {
+    answer.hidden = false;
+    answer.classList.toggle("error", !!isError);
+    answer.textContent = text;
+  }
+
+  async function ask() {
+    const question = q.value.trim();
+    if (!question) return;
+
+    send.disabled = true;
+    statusEl.textContent = "ทีมกำลังคิดคำตอบ...";
+    answer.hidden = true;
+
+    try {
+      const res = await fetch(GATEWAY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || ("เกิดข้อผิดพลาด (" + res.status + ")"));
+      show(data.answer || "ทีมไม่ได้ส่งคำตอบกลับมา", false);
+    } catch (err) {
+      show("ส่งคำถามไม่สำเร็จ: " + err.message, true);
+    } finally {
+      send.disabled = false;
+      statusEl.textContent = "";
+    }
+  }
+
+  send.addEventListener("click", ask);
+  q.addEventListener("keydown", e => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) ask();
+  });
+</script>
+</body>
+</html>

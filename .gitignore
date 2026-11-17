@@ -1,0 +1,27 @@
+# ===== ค่าลับ: ห้ามขึ้น Git เด็ดขาด =====
+# session_state.json เก็บ cookie / refresh token ของ AionUi (เทียบเท่ารหัสผ่าน)
+session_state.json
+session_state.json.lock
+session_state.json.tmp
+*.bak.json
+.env
+.env.*
+!.env.example
+
+# ===== ล็อกและข้อมูลในเครื่อง =====
+# logs/ws_probe.log มีเนื้อหาแชตของทีม
+logs/
+*.log
+
+# ===== Python =====
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# ===== เครื่องมือ/ระบบปฏิบัติการ =====
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
